@@ -1,30 +1,35 @@
+# frozen_string_literal: true
+
 require 'net/http'
 
-class PokemonController < ActionController::Base
-    before_action :set_response, only: [:index, :search]
+class PokemonController < ApplicationController
+  API_URL = 'https://pokeapi.co/api/v2/pokemon'
 
-    def index
-        render json: pokemon_lists, status: 200
-    end
+  before_action :pokeman_list, only: %i[index search]
 
-    def create
-        pokemon = parmas[:pokemon]
-        render json: pokemon, status: 201
-    end
+  def index
+    render json: @pokemon_lists, status: :ok
+  end
 
-    def show
-        pokemon = JSON.parse(Net::HTTP.get(URI.parse(`https://pokeapi.co/api/v2/pokemon/#{params[:id]}`)))
-        render json: pokemon, status: 200
-    end
+  def create
+    pokemon = parmas[:pokemon]
+    render json: pokemon, status: :created
+  end
 
-    def search
-        pokemon = pokemon_lists.select{|pokemon| pokemon["name"].include?(params[:name])}
-        render json: pokemon, status: 200
-    end
+  def show
+    pokemon = JSON.parse(Net::HTTP.get(URI.parse("#{API_URL}/#{params[:id]}")))
+    render json: pokemon, status: :ok
+  end
 
-    private
+  def search
+    pokemon = @pokemon_lists.select { |p| p['name'].include?(params[:name]) }
+    render json: pokemon, status: :ok
+  end
 
-    def set_response
-        pokemon_lists = JSON.parse(Net::HTTP.get(URI.parse('https://pokeapi.co/api/v2/pokemon?limit=500')))["results"]
-    end
+  private
+
+  def pokeman_list
+    limit = params[:limit] || '500'
+    @pokemon_lists = JSON.parse(Net::HTTP.get(URI.parse("#{API_URL}?limit=#{limit}")))['results']
+  end
 end
