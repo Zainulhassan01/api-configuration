@@ -1,6 +1,10 @@
-Rails.application.routes.draw do
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
-  resources :pokemon
+# frozen_string_literal: true
 
-  get 'pokemon/search' => 'pokemon#search'
+Rails.application.routes.draw do
+
+  resources :pokemon do
+    collection do
+      get :search
+    end
+  end
 end
